@@ -4,20 +4,6 @@ services:
     build: .
     ports:
       - "4000:80"
-    networks:
-      - movie-net
     volumes:
       - .:/app
-    command: python main.py
-    depends_on:
-      - mongodb
-
-  mongodb:
-    image: mongo
-    ports:
-      - "27017:27017"
-    networks:
-      - movie-net
-
-networks:
-  movie-net:
+    command: python movies.py
