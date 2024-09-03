@@ -27,9 +27,9 @@ def fetch_all_movies():
 all_movies = fetch_all_movies()
 print(f"All movies are fetched! {len(all_movies)}")
 
-final_movies_list = validations_aka_transformation(all_movies)
-print(f"Transformation don on your all_movies list: {len(final_movies_list)}")
+#final_movies_list = validations_aka_transformation(all_movies)
+#print(f"Transformation don on your all_movies list: {len(final_movies_list)}")
 
 
-save_movies_json(final_movies_list, 'final_movies_list.json')
+#save_movies_json(final_movies_list, 'final_movies_list.json')
 #save_movies_mongo(final_movies_list, 'final_movies_list')
