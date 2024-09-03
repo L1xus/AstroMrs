@@ -1,7 +1,7 @@
 from datetime import datetime
 
-def validations_aka_transformation(movies):
-    final_movie_list = []
+def validation_aka_transformation(movies):
+    movie_list = []
     seen_movie_ids = set()
 
     for movie in movies:
@@ -28,6 +28,7 @@ def validations_aka_transformation(movies):
             except:
                 pass
         
-        final_movie_list.append(movie)
+        movie_list.append(movie)
 
-    return final_movie_list
+    return movie_list
+

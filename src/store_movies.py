@@ -1,10 +1,11 @@
 import json
 from pymongo import MongoClient
 
-def save_movies_json(movies, filename):
-    with open(filename, 'w', encoding='utf-8') as file:
-        json.dump(movies, file, ensure_ascii=False, indent=4)
-    print(f"Movies saved to {filename}")
+def save_movies_jsonl(movies, filename):
+    with open(filename, 'a', encoding='utf-8') as file: 
+        for movie in movies:
+            file.write(json.dumps(movie, ensure_ascii=False, indent=4) + '\n')  # Write each movie as a JSON line
+    print(f"{len(movies)} Movies appended to {filename}")
 
 def save_movies_mongo(movies, collection_name):
     client = MongoClient('mongodb://mongodb:27017/')

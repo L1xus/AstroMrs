@@ -1,30 +1,37 @@
+from pyspark.sql import SparkSession
 from dotenv import load_dotenv
 import os
-import json
 
-from src.fetch_movies import fetch_popular_movies, fetch_top_rated_movies, fetch_latest_movies
-from src.transform_movies import validations_aka_transformation
-from src.store_movies import save_movies_json, save_movies_mongo
-
-from pyspark.sql import SparkSession
+from src.fetch_movies import fetch_movies 
+from src.transform_movies import validation_aka_transformation
+from src.store_movies import save_movies_jsonl
 
 load_dotenv()
-
 api_url = os.getenv('API_URL')
 authorization_key = os.getenv('AUTHORIZATION_KEY')
 
 spark = SparkSession.builder.master("local").appName("Movies Pipeline").getOrCreate()
 
-fetch_functions = [
-    lambda: fetch_popular_movies(api_url, authorization_key),
-    lambda: fetch_top_rated_movies(api_url, authorization_key),
-    lambda: fetch_latest_movies(api_url, authorization_key)
-]
 
-def fetch_movies_parallel():
-    rdd = spark.sparkContext.parallelize(fetch_functions, len(fetch_functions))
-    movies_rdd = rdd.flatMap(lambda f: f())
-    return movies_rdd.collect()
+def etl(endpoint, total_pages=None, filename=None):
+    if endpoint == '/movie/latest':
+        movies = fetch_movies(api_url, authorization_key, endpoint)
+        transformed_movies = validation_aka_transformation(movies)
+        save_movies_jsonl(transformed_movies, 'latest_movies.jsonl')
+    else:
+        pages = list(range(1, total_pages + 1))
+        rdd = spark.sparkContext.parallelize(pages, len(pages))
 
-movies = fetch_movies_parallel()
-print(f"all movies are fetched with help of pyspark :) {len(movies)}")
+        rdd.foreach(lambda page: 
+            save_movies_jsonl(
+                validation_aka_transformation(
+                    fetch_movies(api_url, authorization_key, endpoint, page)
+                ),
+                filename
+            )
+        )
+    print("ETL process completed!")
+
+
+etl('/movie/popular', 500, 'popular_movies.jsonl')
+etl('/movie/latest')
