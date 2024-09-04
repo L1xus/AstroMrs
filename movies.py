@@ -17,7 +17,7 @@ def etl(endpoint, total_pages=None, filename=None):
     if endpoint == '/movie/latest':
         movies = fetch_movies(api_url, authorization_key, endpoint)
         transformed_movies = validation_aka_transformation(movies)
-        save_movies_jsonl(transformed_movies, 'latest_movies.jsonl')
+        save_movies_jsonl(transformed_movies, 'movies.jsonl')
     else:
         pages = list(range(1, total_pages + 1))
         rdd = spark.sparkContext.parallelize(pages, len(pages))
@@ -30,8 +30,9 @@ def etl(endpoint, total_pages=None, filename=None):
                 filename
             )
         )
-    print("ETL process completed!")
+    print(f"ETL process completed for {endpoint}")
 
 
-etl('/movie/popular', 500, 'popular_movies.jsonl')
+etl('/movie/popular', 500, 'movies.jsonl')
+etl('/movie/top_rated', 500, 'movies.jsonl')
 etl('/movie/latest')

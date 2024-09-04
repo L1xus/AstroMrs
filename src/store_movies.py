@@ -4,7 +4,7 @@ from pymongo import MongoClient
 def save_movies_jsonl(movies, filename):
     with open(filename, 'a', encoding='utf-8') as file: 
         for movie in movies:
-            file.write(json.dumps(movie, ensure_ascii=False, indent=4) + '\n')  # Write each movie as a JSON line
+            file.write(json.dumps(movie, ensure_ascii=False, indent=4) + '\n')
     print(f"{len(movies)} Movies appended to {filename}")
 
 def save_movies_mongo(movies, collection_name):

@@ -15,6 +15,12 @@ def fetch_all_movies():
     popular_movies = fetch_popular_movies(api_url, authorization_key)
     movies_list.extend(popular_movies)
 
+    top_rated_movies = fetch_top_rated_movies(api_url, authorization_key)
+    movies_list.extend(top_rated_movies)
+
+    latest_movies = fetch_latest_movies(api_url, authorization_key)
+    movies_list.extend(latest_movies)
+
     return movies_list
 
 
