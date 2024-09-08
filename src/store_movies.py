@@ -1,11 +1,22 @@
 import json
 from pymongo import MongoClient
 
+def check_dup(file_path):
+    ids = []
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            movie = json.loads(line)
+            ids.append(movie['id'])
+    return ids
+
 def save_movies_jsonl(movies, filename):
+    movie_ids = check_dup(filename)
     with open(filename, 'a', encoding='utf-8') as file: 
         for movie in movies:
-            file.write(json.dumps(movie, ensure_ascii=False, indent=4) + '\n')
-    print(f"{len(movies)} Movies appended to {filename}")
+            if movie['id'] not in movie_ids:   
+                file.write(json.dumps(movie, ensure_ascii=False) + '\n')
+                movie_ids.append(movie['id']) 
+    print(f"{len(movies)} new Movies appended to {filename}")
 
 def save_movies_mongo(movies, collection_name):
     client = MongoClient('mongodb://mongodb:27017/')
