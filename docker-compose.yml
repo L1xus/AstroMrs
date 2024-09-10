@@ -1,3 +1,4 @@
+version: '3'
 x-airflow-common:
   &airflow-common
   image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.10.1}
@@ -13,7 +14,9 @@ x-airflow-common:
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     API_URL: ${API_URL}
     AUTHORIZATION_KEY: ${AUTHORIZATION_KEY}
+    PYTHONPATH: '/opt/airflow/AstroMRS'
   volumes:
+    - ${AIRFLOW_PROJ_DIR:-.}:/opt/airflow/AstroMRS
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
     - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
