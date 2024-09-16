@@ -1,17 +1,14 @@
-import sys
-import os
-from src.fetch_movies import fetch_movies
-
 from datetime import datetime, timedelta
-import requests
+import os
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-# from airflow.providers.http.operators.http import SimpleHttpOperator
-# from airflow.providers.mongo.hooks.mongo import MongoHook
 
-API_URL = os.environ.get('API_URL')
-AUTHORIZATION_KEY = os.environ.get('AUTHORIZATION_KEY')
+from src.fetch_movies import fetch_movies
+from src.transform_movies import validation_aka_transformation
+
+api_url = os.environ.get('API_URL')
+authorization_key = os.environ.get('AUTHORIZATION_KEY')
 
 def on_failure_callback(**context):
     print(f"Task {context['task_instance_key_str']} failed.")
@@ -23,75 +20,38 @@ default_args = {
     'on_failure_callback': on_failure_callback
 }
 
-# def fetch_movies(ti):
-#     api_url = ti.xcom_pull(task_ids='something', key='api_url')
-#     authorization_key = ti.xcom_pull(task_ids='something', key='authorization_key')
-#     endpoint = ti.xcom_pull(task_ids='something', key='endpoint')
-#     page = ti.xcom_pull(task_ids='something', key='page')
-#
-#     page_movies = []
-#
-#     headers = {
-#         "accept": "application/json",
-#         "Authorization": f"Bearer {authorization_key}"
-#     }
-#
-#     if page:
-#         page_url = f"{api_url}{endpoint}?language=en-US&page={page}"
-#     else:
-#         page_url = f"{api_url}{endpoint}"
-#
-#     response = requests.get(page_url, headers=headers)
-#
-#     if response.status_code == 200:
-#         data = response.json()
-#         if endpoint == '/movie/latest':
-#             return [data]
-#         else:
-#             movies = data.get('results', [])
-#             page_movies.extend(movies)
-#             print(f"You fetched {page_movies}")
-#             return page_movies
-#     else:
-#         print(f"Failed to fetch page {page}: {response.status_code}")
-#         return []
-#
-# def something(ti):
-#     ti.xcom_push(key='api_url', value=API_URL)
-#     ti.xcom_push(key='authorization_key', value=AUTHORIZATION_KEY)
-#     ti.xcom_push(key='endpoint', value='/movie/popular')
-#     ti.xcom_push(key='page', value=1)
-#
+def fetch_movies_task(**kwargs):
+    page = 1
+    endpoint = '/movie/popular'
+    movies = fetch_movies(api_url, authorization_key, endpoint, page)
+    return movies
+
+def transform_movies_task(**kwargs):
+    ti = kwargs['ti']
+    fetched_movies = ti.xcom_pull(task_ids='fetch_movies')
+    transform_movies=validation_aka_transformation(fetched_movies)
+    return transform_movies
 
 with DAG(
-    dag_id="movies_pipeline_v02",
+    dag_id="movies_pipeline_v03",
     default_args=default_args,
     schedule_interval='@daily',
     start_date=datetime(2024,9,10),
     tags= ["fetch"]
 ) as dag:
 
-    # fetching_task = SimpleHttpOperator(
-    #     task_id='fetch_movies',
-    #     method='GET',
-    #     headers={"Content-Type": "application/json"},
-    #     dag=dag
-    # )
-    # setup_task = PythonOperator(
-    #     task_id='something',
-    #     python_callable=something,
-    #     dag=dag
-    # )
     fetch_task = PythonOperator(
         task_id='fetch_movies',
-        python_callable=fetch_movies,
-        op_kwargs={
-            'api_url':API_URL, 
-            'authorization_key':AUTHORIZATION_KEY, 
-            'endpoint':'/movie/popular', 
-            'page':1
-        },
+        python_callable=fetch_movies_task,
+        provide_context=True,
         dag=dag
     )
 
-    fetch_task
+    transform_task = PythonOperator(
+        task_id='transform_movies',
+        python_callable=transform_movies_task,
+        provide_context=True,
+        dag=dag
+    )
+
+    fetch_task >> transform_task

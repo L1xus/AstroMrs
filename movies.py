@@ -10,7 +10,7 @@ load_dotenv()
 api_url = os.getenv('API_URL')
 authorization_key = os.getenv('AUTHORIZATION_KEY')
 
-spark = SparkSession.builder.master("local").appName("Movies Pipeline").getOrCreate()
+spark = SparkSession.builder.master("spark://spark-master:7077").appName("Movies Pipeline").getOrCreate()
 
 
 def etl(endpoint, total_pages=None, filename=None):
