@@ -1,18 +1,16 @@
-FROM python:3.11-slim
+FROM apache/airflow:2.10.2-python3.11
 
-WORKDIR /app
+USER root
 
-COPY . /app
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+         openjdk-17-jre-headless \
+  && apt-get autoremove -yqq --purge \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install OpenJDK for PySpark
-RUN apt-get update && apt-get install -y openjdk-17-jdk && apt-get clean
+USER airflow
 
-# Set JAVA_HOME
-ENV JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
-ENV PATH $JAVA_HOME/bin:$PATH
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-EXPOSE 80
-
-CMD ["python", "main.py"]
+RUN pip install --no-cache-dir "apache-airflow==${AIRFLOW_VERSION}" pyspark==3.5.1 apache-airflow-providers-apache-spark==2.1.3 pymongo

@@ -1,5 +1,4 @@
 requests==2.32.3
 python-dotenv==1.0.1
 pymongo==4.8.0
-apache-airflow==2.10.0
 pyspark==3.5.1
