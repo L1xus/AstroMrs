@@ -8,6 +8,9 @@ I use Spark to distribute this process and Airflow to automate it.
 ## Table of Contents
 * [Architecture diagram](#architecture-diagram)
 * [How it works](#how-it-works)
+    * [Extract](#extract)
+    * [Transform](#transform)
+    * [Load](#load)
 * [Tech Stack](#teck-stack)
 * [Prerequisites](#prerequisites)
 * [Run the project](#run-the-project)
@@ -19,23 +22,23 @@ I use Spark to distribute this process and Airflow to automate it.
 
 ## How it works
 
-1. ### Extract
+### 1. Extract
 The **extract** phase is handled by the function fetch_movies from src/fetch_movies.py module.
- - API Requests: The fetch_movies function sends GET requests to TMDB API endpoints.
- - Spark Integration: For endpoints with multiple pages, the script uses Spark's RDD to distribute the API calls across 2 spark-workers.
+ - **API Requests:** The fetch_movies function sends GET requests to TMDB API endpoints.
+ - **Spark Integration:** For endpoints with multiple pages, the script uses Spark's RDD to distribute the API calls across 2 spark-workers.
 
-2. ### Transform
+### 2. Transform
 The **transform** phase involves the function validation_aka_transformation from src/transform_movies.py module.
- - Data Cleaning: The validation_aka_transformation function performs data cleaning on the fetched movies by removing duplicates, unwanted fields and null values.
- - Data Transformation: The function also transforms the release_date to datetime and creates a year field.
+ - **Data Cleaning:** The validation_aka_transformation function performs data cleaning on the fetched movies by removing duplicates, unwanted fields and null values.
+ - **Data Transformation:** The function also transforms the release_date to datetime and creates a year field.
 
-3. ### Load 
+### 3. Load 
 The **load** phase is execute by the save_movies_mongo function from src/store_movies.py module.
- - Storage in MongoDB: After validation, the transformed movies is loaded into a MongoDB Collection (movies_collection).
+ - **Storage in MongoDB:** After validation, the transformed movies is loaded into a MongoDB Collection (movies_collection).
 
-- **Those 3 ETL functions are called within a spark job to speed up the process of extracting, transforming and loading large volumes of movies.**
+**Those 3 ETL functions are called within a spark job to speed up the process of extracting, transforming and loading large volumes of movies.**
 
-- **Apache Airflow is used to automate and orchestrate the spark job, enabling scheduled execution and efficient management of the ETF workflow.**
+**Apache Airflow is used to automate and orchestrate the spark job, enabling scheduled execution and efficient management of the ETF workflow.**
 
 ## Tech Stack
  - **Python:** Main programming language used for building the ETL pipeline logic.
