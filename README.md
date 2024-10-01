@@ -33,7 +33,7 @@ The **transform** phase involves the function validation_aka_transformation from
 The **load** phase is execute by the save_movies_mongo function from src/store_movies.py module.
  - Storage in MongoDB: After validation, the transformed movies is loaded into a MongoDB Collection (movies_collection).
 
-- **Those 3 ETL functions are called within a spark job to speed up the process of extracting, transforming and loading large volumes of movies**
+- **Those 3 ETL functions are called within a spark job to speed up the process of extracting, transforming and loading large volumes of movies.**
 
 - **Apache Airflow is used to automate and orchestrate the spark job, enabling scheduled execution and efficient management of the ETF workflow.**
 
